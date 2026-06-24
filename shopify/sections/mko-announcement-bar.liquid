@@ -1,0 +1,351 @@
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+
+  .announcement-bar-slider {
+    background-color: {{ section.settings.bg_color }};
+    color: {{ section.settings.text_color }};
+    position: relative;
+    overflow: hidden;
+  }
+
+  .announcement-bar-slide {
+    display: none;
+    text-align: center;
+    width: 100%;
+  }
+
+  .announcement-bar-slide.active {
+    display: block;
+  }
+
+  .announcement-bar-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .announcement-text {
+    margin: 0;
+    display: inline-block;
+    color: {{ section.settings.text_color }};
+  }
+  
+  .announcement-text p {
+    margin: 0;
+    display: inline;
+    color: {{ section.settings.text_color }};
+   font-family: var(--font-heading-family);
+  }
+
+  .announcement-text a {
+    color: inherit;
+    text-decoration: underline;
+  }
+
+  .announcement-link-wrapper {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    width: 100%;
+  }
+
+  .announcement-link-wrapper:hover {
+    text-decoration: none;
+  }
+
+  .countdown-timer {
+    display: inline-flex;
+    gap: 5px;
+    font-weight: bold;
+    color: {{ section.settings.text_color }}; /* Same color as text */
+  }
+
+  .countdown-item {
+    display: inline-block;
+  }
+
+  .text-small { font-size: 0.875rem; }
+  .text-normal { font-size: 1rem; }
+  .text-large { font-size: 1.25rem; }
+
+{%- endstyle -%}
+
+<div class="announcement-bar-slider section-{{ section.id }}-padding" data-auto-slide="{{ section.settings.auto_slide }}" data-slide-interval="{{ section.settings.slide_interval | times: 1000 }}" data-convert-days-to-hours="{{ section.settings.convert_days_to_hours }}">
+  {%- for block in section.blocks -%}
+    <div class="announcement-bar-slide {% if forloop.first %}active{% endif %}" {{ block.shopify_attributes }}>
+      {%- if block.settings.link != blank -%}
+        <a href="{{ block.settings.link }}" class="announcement-link-wrapper">
+      {%- endif -%}
+
+      <div class="announcement-bar-content h5 ">
+        {%- capture countdown_html -%}
+          {%- if block.settings.show_countdown -%}
+            <span class="countdown-timer" data-deadline="{{ block.settings.deadline }}" data-days-duration="{{ block.settings.days_duration }}" data-hours-duration="{{ block.settings.hours_duration }}">
+              {%- unless section.settings.convert_days_to_hours -%}
+                <span class="days">00</span>d : 
+              {%- endunless -%}
+              <span class="hours">00</span>h : <span class="minutes">00</span>m : <span class="seconds">00</span>s
+            </span>
+          {%- endif -%}
+        {%- endcapture -%}
+
+        <div class="announcement-text">
+          {%- if block.settings.text contains '[timer]' -%}
+            {{ block.settings.text | replace: '[timer]', countdown_html }}
+          {%- else -%}
+            {{ block.settings.text }}
+            {{ countdown_html }}
+          {%- endif -%}
+        </div>
+      </div>
+
+      {%- if block.settings.link != blank -%}
+        </a>
+      {%- endif -%}
+    </div>
+  {%- endfor -%}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const slider = document.querySelector('.section-{{ section.id }}-padding');
+  if (!slider) return;
+
+  const slides = slider.querySelectorAll('.announcement-bar-slide');
+  const autoSlide = slider.dataset.autoSlide === 'true';
+  const intervalTime = parseInt(slider.dataset.slideInterval);
+  const convertDaysToHours = slider.dataset.convertDaysToHours === 'true';
+  let currentSlide = 0;
+
+  // Countdown Logic
+  function updateCountdowns() {
+    const now = new Date().getTime();
+    
+    slides.forEach(slide => {
+      const timerElement = slide.querySelector('.countdown-timer');
+      if (!timerElement) return;
+
+      const deadlineStr = timerElement.dataset.deadline;
+      if (!deadlineStr) return;
+
+      const deadline = new Date(deadlineStr).getTime();
+      
+      // Calculate visibility window
+      const daysDuration = parseInt(timerElement.dataset.daysDuration) || 0;
+      const hoursDuration = parseInt(timerElement.dataset.hoursDuration) || 0;
+      const durationMs = (daysDuration * 24 * 60 * 60 * 1000) + (hoursDuration * 60 * 60 * 1000);
+      
+      const showTime = deadline - durationMs;
+
+      // Only show if within duration window and not expired
+      // If duration is 0, it means always show until deadline
+      if (durationMs > 0 && now < showTime) {
+         timerElement.style.display = 'none';
+         return;
+      }
+
+      const distance = deadline - now;
+
+      if (distance < 0) {
+        timerElement.style.display = 'none';
+        return;
+      } else {
+        timerElement.style.display = 'inline-flex';
+      }
+
+      let days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      let hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      if (convertDaysToHours) {
+        hours += days * 24;
+      }
+
+      if (!convertDaysToHours) {
+        const daysEl = timerElement.querySelector('.days');
+        if (daysEl) daysEl.innerText = days < 10 ? '0' + days : days;
+      }
+      
+      timerElement.querySelector('.hours').innerText = hours < 10 ? '0' + hours : hours;
+      timerElement.querySelector('.minutes').innerText = minutes < 10 ? '0' + minutes : minutes;
+      timerElement.querySelector('.seconds').innerText = seconds < 10 ? '0' + seconds : seconds;
+    });
+  }
+
+  setInterval(updateCountdowns, 1000);
+  updateCountdowns();
+
+  // Slider Logic
+  if (autoSlide && slides.length > 1) {
+    setInterval(() => {
+      slides[currentSlide].classList.remove('active');
+      currentSlide = (currentSlide + 1) % slides.length;
+      slides[currentSlide].classList.add('active');
+    }, intervalTime);
+  }
+});
+</script>
+
+{% schema %}
+{
+  "name": "Mko Announcement Slider",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Slider Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "auto_slide",
+      "label": "Auto Rotate Slides",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "slide_interval",
+      "min": 3,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "label": "Change slides every",
+      "default": 5
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 36,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 36,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Countdown Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "convert_days_to_hours",
+      "label": "Convert days to hours",
+      "default": false,
+      "info": "Displays total hours instead of days (e.g. 48h instead of 2d)"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "announcement",
+      "name": "Announcement",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>Welcome to our store</p>",
+          "info": "Use [timer] to place the countdown within the text."
+        },
+        {
+          "type": "select",
+          "id": "text_size",
+          "label": "Text Size",
+          "options": [
+            { "value": "small", "label": "Small" },
+            { "value": "normal", "label": "Normal" },
+            { "value": "large", "label": "Large" }
+          ],
+          "default": "normal"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link (Optional)",
+          "info": "Makes the entire bar clickable"
+        },
+        {
+          "type": "header",
+          "content": "Countdown Timer"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_countdown",
+          "label": "Show Countdown",
+          "default": false
+        },
+        {
+          "type": "text",
+          "id": "deadline",
+          "label": "Deadline",
+          "info": "Format: December 25 2025 23:59:59 GMT-0600",
+          "default": "December 25 2025 23:59:59 GMT-0600"
+        },
+        {
+          "type": "number",
+          "id": "days_duration",
+          "label": "Show X days before deadline",
+          "default": 0,
+          "info": "Set to 0 to always show until deadline"
+        },
+        {
+          "type": "number",
+          "id": "hours_duration",
+          "label": "Show X hours before deadline",
+          "default": 0
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Mko Announcement Bar Slider",
+      "blocks": [
+        {
+          "type": "announcement"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

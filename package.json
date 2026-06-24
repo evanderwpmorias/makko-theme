@@ -1,0 +1,41 @@
+{
+  "name": "pi-dawn-theme",
+  "version": "1.0.0",
+  "description": "Makko Shopify Theme",
+  "type": "module",
+  "scripts": {
+    "start": "shopify:dev",
+    "logout": "shopify auth logout",
+    "login": "shopify theme list --store makko-5329.myshopify.com && shopify theme info",
+    "login:test": "shopify theme list --store makko-5329.myshopify.com && shopify theme info",
+    "shopify:dev": "shopify theme dev --path shopify --live-reload hot-reload",
+    "shopify:pull": "shopify theme pull --path shopify",
+    "deploy": "shopify theme push --path shopify",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [
+    "shopify",
+    "theme",
+    "vite",
+    "typescript",
+    "tailwindcss"
+  ],
+  "author": "Premium Invention",
+  "license": "MIT",
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.11",
+    "@types/node": "^22.10.2",
+    "npm-run-all": "^4.1.5",
+    "tailwindcss": "^4.1.11",
+    "terser": "^5.36.0",
+    "typescript": "^5.8.3",
+    "vite": "^6.0.3",
+    "vite-plugin-shopify": "^4.0.1"
+  },
+  "overrides": {
+    "inflight": "npm:@npmcli/promise-spawn@^7.0.2",
+    "rimraf": "^6.0.1",
+    "glob": "^11.0.0",
+    "node-domexception": "npm:domexception@^4.0.0"
+  }
+}
