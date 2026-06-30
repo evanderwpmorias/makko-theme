@@ -1,0 +1,322 @@
+{% liquid
+  assign section_settings = section.settings
+  assign ingredients = product.metafields.custom.key_ingredients.value
+  assign card_limit = section_settings.card_count
+  assign image_size = section_settings.image_size
+%}
+
+{% if ingredients != blank or request.design_mode %}
+  <section
+    class="mk-ingredients"
+    style="
+      --mk-ingredients-bg-color: {{ section_settings.background_color }};
+      --mk-ingredients-text-color: {{ section_settings.text_color }};
+      --mk-ingredients-image-size: {{ image_size }}px;
+      --mk-ingredients-image-radius: {{ section_settings.image_radius }}px;
+      --mk-ingredients-columns: {{ card_limit }};
+      --mk-ingredients-padding-top: {{ section_settings.padding_top }}px;
+      --mk-ingredients-padding-bottom: {{ section_settings.padding_bottom }}px;
+    "
+  >
+    <div class="mk-ingredients__inner page-width">
+      {% if section_settings.heading != blank or section_settings.description != blank %}
+        <div class="mk-ingredients__header">
+          {% if section_settings.heading != blank %}
+            <div class="mk-ingredients__heading">
+              {{ section_settings.heading }}
+            </div>
+          {% endif %}
+
+          {% if section_settings.description != blank %}
+            <div class="mk-ingredients__intro">
+              {{ section_settings.description }}
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {% if ingredients != blank %}
+        <div class="mk-ingredients__grid">
+          {% for ingredient in ingredients limit: card_limit %}
+            {% liquid
+              assign ingredient_title = ingredient.title.value | default: ingredient.title
+              assign ingredient_description = ingredient.short_description.value | default: ingredient.short_description
+              assign ingredient_image = ingredient.image.value | default: ingredient.image
+            %}
+
+            <article class="mk-ingredients__card">
+              {% if ingredient_image != blank %}
+                <div class="mk-ingredients__image-wrap">
+                  {{
+                    ingredient_image
+                    | image_url: width: 800
+                    | image_tag:
+                      loading: 'lazy',
+                      class: 'mk-ingredients__image',
+                      widths: '200, 300, 400, 500, 600, 800',
+                      sizes: '(min-width: 990px) 400px, 70vw'
+                  }}
+                </div>
+              {% endif %}
+
+              {% if ingredient_title != blank %}
+                <h3 class="mk-ingredients__title">
+                  {{ ingredient_title }}
+                </h3>
+              {% endif %}
+
+              {% if ingredient_description != blank %}
+                <div class="mk-ingredients__description">
+                  {{ ingredient_description }}
+                </div>
+              {% endif %}
+            </article>
+          {% endfor %}
+        </div>
+      {% elsif request.design_mode %}
+        <div class="mk-ingredients__empty">
+          Add metaobjects to product.metafields.custom.key_ingredients.
+        </div>
+      {% endif %}
+    </div>
+  </section>
+{% endif %}
+
+{% stylesheet %}
+  .mk-ingredients {
+    background-color: var(--mk-ingredients-bg-color);
+    color: var(--mk-ingredients-text-color);
+    padding-block-start: var(--mk-ingredients-padding-top);
+    padding-block-end: var(--mk-ingredients-padding-bottom);
+    padding-inline: var(--page-margin);
+  }
+
+  .mk-ingredients__inner {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  .mk-ingredients__header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    text-align: center;
+  }
+
+  .mk-ingredients__heading,
+  .mk-ingredients__heading > * {
+    margin: 0;
+    font-family: Karma, var(--font-heading--family);
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 700;
+    line-height: 1.2;
+    text-align: center;
+  }
+
+  .mk-ingredients__intro,
+  .mk-ingredients__intro > * {
+    margin: 0;
+    font-family: Karma, var(--font-body--family);
+    font-size: 28px;
+    font-weight: 400;
+    line-height: 1.4;
+    text-align: center;
+  }
+
+  .mk-ingredients__grid {
+    display: grid;
+    grid-template-columns: repeat(var(--mk-ingredients-columns), minmax(0, 1fr));
+    gap: clamp(24px, 4vw, 48px);
+    align-items: start;
+  }
+
+  .mk-ingredients__card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .mk-ingredients__image-wrap {
+    width: min(100%, var(--mk-ingredients-image-size));
+    aspect-ratio: 1;
+    flex: 0 0 auto;
+    margin-block-end: 24px;
+    border-radius: var(--mk-ingredients-image-radius);
+    overflow: hidden;
+  }
+
+  .mk-ingredients__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 1;
+    transform: rotate(0deg);
+  }
+
+  .mk-ingredients__title,
+  .mk-ingredients__description {
+    margin: 0;
+    font-family: Karma, var(--font-body--family);
+    font-size: 18px;
+    line-height: 1.4;
+    letter-spacing: 0;
+    text-align: center;
+  }
+
+  .mk-ingredients__title {
+    color: inherit;
+  }
+
+  .mk-ingredients__title {
+    font-weight: 700;
+  }
+
+  .mk-ingredients__description {
+    margin-block-start: 8px;
+    font-weight: 400;
+  }
+
+  .mk-ingredients__description > * {
+    margin-block: 0;
+  }
+
+  .mk-ingredients__empty {
+    padding: 24px;
+    text-align: center;
+    border: 1px dashed rgb(var(--color-border-rgb));
+  }
+
+  @media screen and (max-width: 989px) {
+    .mk-ingredients__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .mk-ingredients__grid {
+      display: flex;
+      gap: 24px;
+      margin-inline: calc(var(--page-margin) * -1);
+      padding-inline: var(--page-margin);
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+    }
+
+    .mk-ingredients__grid::-webkit-scrollbar {
+      display: none;
+    }
+
+    .mk-ingredients__card {
+      flex: 0 0 min(82vw, 360px);
+      scroll-snap-align: center;
+    }
+
+    .mk-ingredients__intro,
+    .mk-ingredients__intro > *,
+    .mk-ingredients__title,
+    .mk-ingredients__description {
+      font-size: 22px;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "MK Ingredients",
+  "settings": [
+    {
+      "type": "richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "<p>Key Ingredients</p>"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description"
+    },
+    {
+      "type": "select",
+      "id": "card_count",
+      "label": "Number of cards",
+      "options": [
+        {
+          "value": "3",
+          "label": "3"
+        },
+        {
+          "value": "4",
+          "label": "4"
+        },
+        {
+          "value": "5",
+          "label": "5"
+        }
+      ],
+      "default": "3"
+    },
+    {
+      "type": "range",
+      "id": "image_size",
+      "label": "Image size",
+      "min": 160,
+      "max": 500,
+      "step": 10,
+      "unit": "px",
+      "default": 400
+    },
+    {
+      "type": "range",
+      "id": "image_radius",
+      "label": "Image radius",
+      "min": 0,
+      "max": 250,
+      "step": 5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#F7F5F2"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    }
+  ],
+  "presets": [
+    {
+      "name": "MK Ingredients"
+    }
+  ]
+}
+{% endschema %}

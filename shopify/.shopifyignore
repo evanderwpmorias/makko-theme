@@ -9,12 +9,5 @@ templates/**/*.json
 templates/*.json
 sections/*.json
 sections/**/*.json
-**/*zipifypages*.*
-**/replo.section*.*
-**/reploChunk*.liquid
 
-# Ignore Vite development files
-assets/.vite/
-assets/manifest.json
-assets/.vite/**/*.json
-assets/.vite/*.json
+

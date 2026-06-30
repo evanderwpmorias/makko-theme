@@ -4,7 +4,7 @@
   "description": "Makko Shopify Theme",
   "type": "module",
   "scripts": {
-    "start": "shopify:dev",
+    "start": "npm run shopify:dev",
     "logout": "shopify auth logout",
     "login": "shopify theme list --store makko-5329.myshopify.com && shopify theme info",
     "login:test": "shopify theme list --store makko-5329.myshopify.com && shopify theme info",
