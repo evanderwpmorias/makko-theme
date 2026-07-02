@@ -33,6 +33,9 @@
     when 'large'
       assign grid_template_rows = grid_template_rows | replace: '50dvh', '40dvh'
       assign grid_template_rows_desktop = grid_template_rows_desktop | replace: '70dvh', '60dvh'
+    when 'full-screen'
+      assign grid_template_rows = '--grid-template-rows: minmax(0, 1fr) auto;'
+      assign grid_template_rows_desktop = '--grid-template-rows-desktop: minmax(0, 1fr) auto;'
   endcase
 -%}
 

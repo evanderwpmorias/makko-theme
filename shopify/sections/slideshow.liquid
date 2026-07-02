@@ -263,6 +263,10 @@
         {
           "value": "large",
           "label": "t:options.large"
+        },
+        {
+          "value": "full-screen",
+          "label": "t:options.full_screen"
         }
       ],
       "default": "medium",
@@ -484,7 +488,10 @@
           "block_order": ["heading", "text", "button"]
         }
       },
-      "block_order": ["slide_1", "slide_2"]
+      "block_order": ["slide_1", "slide_2"],
+      "settings": {
+        "slide_height": "full-screen"
+      }
     },
     {
       "name": "t:names.slideshow_inset",
@@ -566,7 +573,7 @@
         "display_mode": "with_hints",
         "slideshow_gap": 18,
         "corner_radius": 20,
-        "slide_height": "medium",
+        "slide_height": "full-screen",
         "content_position": "below-media",
         "icons_style": "arrows_large",
         "icons_shape": "none",
