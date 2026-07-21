@@ -76,5 +76,24 @@
     {% endif %}
     --letter-spacing: var(--letter-spacing--{{ type }}-{{ settings.letter_spacing }});
   {%- endif -%}
+  {%- if settings.font_mobile != blank -%}
+    --font-family-mobile: {{ settings.font_mobile }};
+    --font-weight-mobile: {{ settings.font_mobile | replace: 'family', 'weight' }};
+  {%- endif -%}
+  {%- if settings.font_size_mobile != blank -%}
+    --font-size-mobile: {{ settings.font_size_mobile }};
+  {%- endif -%}
+  {%- if settings.line_height_mobile != blank -%}
+    --line-height-mobile: var(--line-height--{{ type | default: 'body' }}-{{ settings.line_height_mobile }});
+  {%- endif -%}
+  {%- if settings.letter_spacing_mobile != blank -%}
+    --letter-spacing-mobile: var(--letter-spacing--{{ type | default: 'body' }}-{{ settings.letter_spacing_mobile }});
+  {%- endif -%}
+  {%- if settings.case_mobile != blank -%}
+    --text-transform-mobile: {{ settings.case_mobile }};
+  {%- endif -%}
+  {%- if settings.wrap_mobile != blank -%}
+    --text-wrap-mobile: {{ settings.wrap_mobile }};
+  {%- endif -%}
 {%- endcapture -%}
 {{- variables | strip | strip_newlines -}}

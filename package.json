@@ -8,7 +8,7 @@
     "logout": "shopify auth logout",
     "login": "shopify theme list --store makko-5329.myshopify.com && shopify theme info",
     "login:test": "shopify theme list --store makko-5329.myshopify.com && shopify theme info",
-    "shopify:dev": "shopify theme dev --path shopify --live-reload hot-reload",
+    "shopify:dev": "shopify theme dev --path shopify --live-reload hot-reload --theme 144786063434",
     "shopify:pull": "shopify theme pull --path shopify",
     "deploy": "shopify theme push --path shopify",
     "type-check": "tsc --noEmit"

@@ -23,6 +23,13 @@
     if block_settings.inherit_color_scheme == true or block_settings.inherit_color_scheme == false and section.settings.color_scheme.settings.background.rgb == block_settings.color_scheme.settings.background.rgb
       assign rounded_image_corners = true
     endif
+
+    assign mobile_content_direction = block_settings.content_direction
+    if block_settings.content_direction_mobile != blank and block_settings.content_direction_mobile != 'inherit'
+      assign mobile_content_direction = block_settings.content_direction_mobile
+    elsif block_settings.vertical_on_mobile and block_settings.content_direction == 'row'
+      assign mobile_content_direction = 'column'
+    endif
   %}
   {% if section.settings.slide_height == 'adapt_image' and block_index == 0 and preview_image != blank %}
     {%
@@ -156,7 +163,7 @@
       class="group-block-content
       layout-panel-flex
       layout-panel-flex--{{ block_settings.content_direction }}
-      {% if block_settings.vertical_on_mobile %}mobile-column{% endif %}"
+      mobile-{{ mobile_content_direction }}"
       style="{% render 'layout-panel-style', settings: block_settings %}"
     >
       {% content_for 'blocks' %}
@@ -225,12 +232,17 @@
     position: absolute;
   }
 
+  slideshow-slide h2 {
+    --line-height-mobile: 130%;
+    line-height: var(--line-height-mobile);
+}
+
   .slide__image-container :is(.slide__image, .slide__video, .slide__video-poster) {
     position: relative;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center center;
+    object-position: bottom center;
   }
 
   .slide__image-container .slide__video-poster {
@@ -467,6 +479,132 @@
     },
     {
       "type": "header",
+      "content": "Mobile layout"
+    },
+    {
+      "type": "select",
+      "id": "content_direction_mobile",
+      "label": "Direction",
+      "options": [
+        {
+          "value": "inherit",
+          "label": "Same as desktop"
+        },
+        {
+          "value": "column",
+          "label": "t:options.vertical"
+        },
+        {
+          "value": "row",
+          "label": "t:options.horizontal"
+        }
+      ],
+      "default": "inherit"
+    },
+    {
+      "type": "select",
+      "id": "horizontal_alignment_mobile",
+      "label": "Alignment",
+      "options": [
+        {
+          "value": "flex-start",
+          "label": "t:options.left"
+        },
+        {
+          "value": "center",
+          "label": "t:options.center"
+        },
+        {
+          "value": "flex-end",
+          "label": "t:options.right"
+        },
+        {
+          "value": "space-between",
+          "label": "t:options.space_between"
+        }
+      ],
+      "default": "flex-start",
+      "visible_if": "{{ block.settings.content_direction_mobile == 'row' or block.settings.content_direction_mobile == 'inherit' and block.settings.content_direction == 'row' }}"
+    },
+    {
+      "type": "select",
+      "id": "vertical_alignment_mobile",
+      "label": "Position",
+      "options": [
+        {
+          "value": "flex-start",
+          "label": "t:options.top"
+        },
+        {
+          "value": "center",
+          "label": "t:options.center"
+        },
+        {
+          "value": "flex-end",
+          "label": "t:options.bottom"
+        }
+      ],
+      "default": "center",
+      "visible_if": "{{ block.settings.content_direction_mobile == 'row' or block.settings.content_direction_mobile == 'inherit' and block.settings.content_direction == 'row' }}"
+    },
+    {
+      "type": "select",
+      "id": "horizontal_alignment_flex_direction_column_mobile",
+      "label": "Alignment",
+      "options": [
+        {
+          "value": "flex-start",
+          "label": "t:options.left"
+        },
+        {
+          "value": "center",
+          "label": "t:options.center"
+        },
+        {
+          "value": "flex-end",
+          "label": "t:options.right"
+        }
+      ],
+      "default": "flex-start",
+      "visible_if": "{{ block.settings.content_direction_mobile == 'column' or block.settings.content_direction_mobile == 'inherit' and block.settings.content_direction != 'row' }}"
+    },
+    {
+      "type": "select",
+      "id": "vertical_alignment_flex_direction_column_mobile",
+      "label": "Position",
+      "options": [
+        {
+          "value": "flex-start",
+          "label": "t:options.top"
+        },
+        {
+          "value": "center",
+          "label": "t:options.center"
+        },
+        {
+          "value": "flex-end",
+          "label": "t:options.bottom"
+        },
+        {
+          "value": "space-between",
+          "label": "t:options.space_between"
+        }
+      ],
+      "default": "center",
+      "visible_if": "{{ block.settings.content_direction_mobile == 'column' or block.settings.content_direction_mobile == 'inherit' and block.settings.content_direction != 'row' }}"
+    },
+    {
+      "type": "range",
+      "id": "gap_mobile",
+      "label": "Gap",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "header",
       "content": "t:content.appearance"
     },
     {
@@ -538,8 +676,8 @@
       "id": "padding-block-start",
       "label": "t:settings.top",
       "min": 0,
-      "max": 100,
-      "step": 1,
+      "max": 200,
+      "step": 2,
       "unit": "px",
       "default": 0
     },
@@ -548,8 +686,8 @@
       "id": "padding-block-end",
       "label": "t:settings.bottom",
       "min": 0,
-      "max": 100,
-      "step": 1,
+      "max": 200,
+      "step": 2,
       "unit": "px",
       "default": 0
     },
@@ -558,8 +696,8 @@
       "id": "padding-inline-start",
       "label": "t:settings.left",
       "min": 0,
-      "max": 100,
-      "step": 1,
+      "max": 200,
+      "step": 2,
       "unit": "px",
       "default": 0
     },
@@ -568,8 +706,8 @@
       "id": "padding-inline-end",
       "label": "t:settings.right",
       "min": 0,
-      "max": 100,
-      "step": 1,
+      "max": 200,
+      "step": 2,
       "unit": "px",
       "default": 0
     }

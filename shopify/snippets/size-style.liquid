@@ -31,3 +31,7 @@
 {%- elsif settings.width_mobile == 'fit-content' -%}
   --size-style-width-mobile: {{ settings.width_mobile }}; --size-style-width-mobile-min: {{ settings.width_mobile }};
 {%- endif -%}
+
+{%- if settings.max_width_px != blank and settings.max_width_px > 0 -%}
+  --size-style-max-width: {{ settings.max_width_px }}px; --size-style-max-width-mobile: {{ settings.max_width_px }}px;
+{%- endif -%}

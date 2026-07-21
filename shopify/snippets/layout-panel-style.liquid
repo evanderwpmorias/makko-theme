@@ -23,11 +23,38 @@
   if settings.vertical_on_mobile and vertical_alignment == 'last baseline'
     assign vertical_alignment_mobile = 'flex-end'
   endif
+
+  assign mobile_content_direction = settings.content_direction | default: 'column'
+  if settings.content_direction_mobile != blank and settings.content_direction_mobile != 'inherit'
+    assign mobile_content_direction = settings.content_direction_mobile
+  elsif settings.vertical_on_mobile and settings.content_direction == 'row'
+    assign mobile_content_direction = 'column'
+  endif
+
+  assign mobile_horizontal_alignment = horizontal_alignment
+  assign mobile_vertical_alignment = vertical_alignment_mobile
+  assign mobile_align_items = horizontal_alignment
+  assign mobile_justify_content = vertical_alignment_mobile
+  assign mobile_flex_wrap = 'nowrap'
+
+  if mobile_content_direction == 'row'
+    assign mobile_horizontal_alignment = settings.horizontal_alignment_mobile | default: settings.horizontal_alignment | default: horizontal_alignment
+    assign mobile_vertical_alignment = settings.vertical_alignment_mobile | default: vertical_alignment_mobile
+    assign mobile_justify_content = mobile_horizontal_alignment
+    assign mobile_align_items = mobile_vertical_alignment
+    assign mobile_flex_wrap = 'wrap'
+  else
+    assign mobile_horizontal_alignment = settings.horizontal_alignment_flex_direction_column_mobile | default: settings.horizontal_alignment_flex_direction_column | default: settings.horizontal_alignment | default: horizontal_alignment
+    assign mobile_vertical_alignment = settings.vertical_alignment_flex_direction_column_mobile | default: settings.vertical_alignment_flex_direction_column | default: vertical_alignment_mobile
+    assign mobile_align_items = mobile_horizontal_alignment
+    assign mobile_justify_content = mobile_vertical_alignment
+  endif
 -%}
 
---flex-direction: {{ settings.content_direction | default: 'column' }}; --flex-wrap: nowrap; --flex-wrap-mobile: wrap;
+--flex-direction: {{ settings.content_direction | default: 'column' }}; --flex-direction-mobile: {{ mobile_content_direction }}; --flex-wrap: nowrap; --flex-wrap-mobile: {{ mobile_flex_wrap }};
 
 {% render 'gap-style', value: settings.gap %}
+{% render 'gap-style', value: settings.gap_mobile, name: 'gap-mobile' %}
 
 --horizontal-alignment: {{ horizontal_alignment }}; --vertical-alignment: {{ vertical_alignment }};
---vertical-alignment-mobile: {{ vertical_alignment_mobile }};
+--vertical-alignment-mobile: {{ mobile_vertical_alignment }}; --mobile-align-items: {{ mobile_align_items }}; --mobile-justify-content: {{ mobile_justify_content }};

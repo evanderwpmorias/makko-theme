@@ -40,6 +40,12 @@
         echo ' custom-color '
       endif
     endif
+    if block_settings.font_mobile != blank or block_settings.font_size_mobile != blank or block_settings.line_height_mobile != blank or block_settings.letter_spacing_mobile != blank or block_settings.case_mobile != blank or block_settings.wrap_mobile != blank
+      echo ' custom-typography-mobile '
+      if block_settings.font_size_mobile != ''
+        echo ' custom-font-size-mobile '
+      endif
+    endif
     if block_settings.background
       echo ' text-block--background '
     endif
@@ -61,6 +67,9 @@
     --max-width: var(--max-width--{{ type }}-{{ block_settings.max_width }});
     {% if block_settings.alignment != blank %}
       --text-align: {{ block_settings.alignment }};
+    {% endif %}
+    {% if block_settings.alignment_mobile != blank and block_settings.alignment_mobile != 'inherit' %}
+      --text-align-mobile: {{ block_settings.alignment_mobile }};
     {% endif %}
     {% if block_settings.background %}
       --text-background-color: {{ block_settings.background_color | default: 'rgb(255 255 255 / 1.0)' }};
@@ -131,6 +140,27 @@
     max-inline-size: min(100%, var(--max-width, 100%));
     text-align: var(--text-align, var(--text-align-default));
     text-wrap: var(--text-wrap);
+  }
+
+  @media screen and (max-width: 749px) {
+    .text-block > * {
+      text-align: var(--text-align-mobile, var(--text-align, var(--text-align-default)));
+    }
+
+    .text-block.custom-typography-mobile,
+    .text-block.custom-typography-mobile > * {
+      font-family: var(--font-family-mobile, var(--font-family));
+      font-weight: var(--font-weight-mobile, var(--font-weight));
+      text-transform: var(--text-transform-mobile, var(--text-transform));
+      text-wrap: var(--text-wrap-mobile, var(--text-wrap));
+      line-height: var(--line-height-mobile, var(--line-height));
+      letter-spacing: var(--letter-spacing-mobile, var(--letter-spacing));
+    }
+
+    .text-block.custom-font-size-mobile,
+    .text-block.custom-font-size-mobile > * {
+      font-size: var(--font-size-mobile, var(--font-size));
+    }
   }
 
   .text-block:not(.text-block--full-width).rte,

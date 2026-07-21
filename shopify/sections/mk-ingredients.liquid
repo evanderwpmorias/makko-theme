@@ -1,11 +1,10 @@
 {% liquid
   assign section_settings = section.settings
   assign ingredients = product.metafields.custom.key_ingredients.value
-  assign card_limit = section_settings.card_count
   assign image_size = section_settings.image_size
 %}
 
-{% if ingredients != blank or request.design_mode %}
+{% if ingredients != blank %}
   <section
     class="mk-ingredients"
     style="
@@ -13,7 +12,6 @@
       --mk-ingredients-text-color: {{ section_settings.text_color }};
       --mk-ingredients-image-size: {{ image_size }}px;
       --mk-ingredients-image-radius: {{ section_settings.image_radius }}px;
-      --mk-ingredients-columns: {{ card_limit }};
       --mk-ingredients-padding-top: {{ section_settings.padding_top }}px;
       --mk-ingredients-padding-bottom: {{ section_settings.padding_bottom }}px;
     "
@@ -36,8 +34,12 @@
       {% endif %}
 
       {% if ingredients != blank %}
-        <div class="mk-ingredients__grid">
-          {% for ingredient in ingredients limit: card_limit %}
+        {% liquid
+          assign ingredient_count = ingredients.count
+        %}
+
+        <div class="mk-ingredients__grid mobile:hidden">
+          {% for ingredient in ingredients %}
             {% liquid
               assign ingredient_title = ingredient.title.value | default: ingredient.title
               assign ingredient_description = ingredient.short_description.value | default: ingredient.short_description
@@ -73,10 +75,66 @@
             </article>
           {% endfor %}
         </div>
-      {% elsif request.design_mode %}
-        <div class="mk-ingredients__empty">
-          Add metaobjects to product.metafields.custom.key_ingredients.
-        </div>
+
+        {% capture mobile_slides %}
+          {% for ingredient in ingredients %}
+            {% liquid
+              assign ingredient_title = ingredient.title.value | default: ingredient.title
+              assign ingredient_description = ingredient.short_description.value | default: ingredient.short_description
+              assign ingredient_image = ingredient.image.value | default: ingredient.image
+            %}
+
+            {% capture mobile_card %}
+              <article class="mk-ingredients__card mk-ingredients__card--slide">
+                {% if ingredient_image != blank %}
+                  <div class="mk-ingredients__image-wrap">
+                    {{
+                      ingredient_image
+                      | image_url: width: 800
+                      | image_tag:
+                        loading: 'lazy',
+                        class: 'mk-ingredients__image',
+                        widths: '200, 300, 400, 500, 600, 800',
+                        sizes: '100vw'
+                    }}
+                  </div>
+                {% endif %}
+
+                {% if ingredient_title != blank %}
+                  <h3 class="mk-ingredients__title">
+                    {{ ingredient_title }}
+                  </h3>
+                {% endif %}
+
+                {% if ingredient_description != blank %}
+                  <div class="mk-ingredients__description">
+                    {{ ingredient_description }}
+                  </div>
+                {% endif %}
+              </article>
+            {% endcapture %}
+
+            {% render 'slideshow-slide', index: forloop.index0, class: 'mk-ingredients__slide', children: mobile_card %}
+          {% endfor %}
+        {% endcapture %}
+
+        {% capture mobile_controls %}
+          {% render 'slideshow-controls', style: 'dots', item_count: ingredient_count, show_arrows: true, class: 'desktop:hidden mk-ingredients__controls' %}
+        {% endcapture %}
+
+        {% render 'slideshow',
+          ref: 'mkIngredientsMobileSlideshow',
+          class: 'desktop:hidden mk-ingredients__carousel',
+          slides: mobile_slides,
+          controls: mobile_controls,
+          show_arrows: false,
+          auto_hide_controls: false,
+          infinite: false,
+          initial_slide: 0,
+          slide_count: ingredient_count,
+          slideshow_gutters: 'start end',
+          style: '--gutter-slide-width: var(--page-margin); --slideshow-gap: 0px;'
+        %}
       {% endif %}
     </div>
   </section>
@@ -126,10 +184,11 @@
   }
 
   .mk-ingredients__grid {
-    display: grid;
-    grid-template-columns: repeat(var(--mk-ingredients-columns), minmax(0, 1fr));
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: clamp(24px, 4vw, 48px);
-    align-items: start;
+    align-items: center;
   }
 
   .mk-ingredients__card {
@@ -137,13 +196,16 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
+    flex: 0 1 calc((100% - (2 * clamp(24px, 4vw, 48px))) / 3);
+    max-width: 300px;
+    min-width: 0;
   }
 
   .mk-ingredients__image-wrap {
     width: min(100%, var(--mk-ingredients-image-size));
     aspect-ratio: 1;
     flex: 0 0 auto;
-    margin-block-end: 24px;
+    margin-block-end: 34px;
     border-radius: var(--mk-ingredients-image-radius);
     overflow: hidden;
   }
@@ -152,14 +214,14 @@
     display: block;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     opacity: 1;
     transform: rotate(0deg);
   }
 
   .mk-ingredients__title,
   .mk-ingredients__description {
-    margin: 0;
+    margin: 10px 0px;
     font-family: Karma, var(--font-body--family);
     font-size: 18px;
     line-height: 1.4;
@@ -184,43 +246,60 @@
     margin-block: 0;
   }
 
-  .mk-ingredients__empty {
-    padding: 24px;
-    text-align: center;
-    border: 1px dashed rgb(var(--color-border-rgb));
+  .mk-ingredients__carousel {
+    display: none;
+  }
+
+  .mk-ingredients__carousel slideshow-container {
+    background: transparent;
+  }
+
+  .mk-ingredients__carousel slideshow-slides {
+    gap: 0;
+  }
+
+  .mk-ingredients__slide {
+    width: 100%;
+    flex: 0 0 100%;
+    scroll-snap-align: center;
+    overflow: visible;
+  }
+
+  .mk-ingredients__card--slide {
+    width: 100%;
+    max-width: none;
+    flex-basis: 100%;
+    padding-inline: var(--page-margin);
+  }
+
+  .mk-ingredients__controls {
+    margin-block-start: 20px;
   }
 
   @media screen and (max-width: 989px) {
-    .mk-ingredients__grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+    .mk-ingredients__card {
+      flex-basis: calc((100% - clamp(24px, 4vw, 48px)) / 1.5);
+      max-width: 100%;
+      margin: 0px auto;
     }
   }
 
   @media screen and (max-width: 749px) {
     .mk-ingredients__grid {
-      display: flex;
-      gap: 24px;
-      margin-inline: calc(var(--page-margin) * -1);
-      padding-inline: var(--page-margin);
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      scrollbar-width: none;
-    }
-
-    .mk-ingredients__grid::-webkit-scrollbar {
       display: none;
     }
 
-    .mk-ingredients__card {
-      flex: 0 0 min(82vw, 360px);
-      scroll-snap-align: center;
+    .mk-ingredients__carousel {
+      display: flex;
     }
 
     .mk-ingredients__intro,
     .mk-ingredients__intro > *,
-    .mk-ingredients__title,
-    .mk-ingredients__description {
+    .mk-ingredients__title  {
       font-size: 22px;
+    }
+    .mk-ingredients__description {
+      font-size: 16px;
     }
   }
 {% endstylesheet %}
@@ -241,30 +320,10 @@
       "label": "Description"
     },
     {
-      "type": "select",
-      "id": "card_count",
-      "label": "Number of cards",
-      "options": [
-        {
-          "value": "3",
-          "label": "3"
-        },
-        {
-          "value": "4",
-          "label": "4"
-        },
-        {
-          "value": "5",
-          "label": "5"
-        }
-      ],
-      "default": "3"
-    },
-    {
       "type": "range",
       "id": "image_size",
       "label": "Image size",
-      "min": 160,
+      "min": 100,
       "max": 500,
       "step": 10,
       "unit": "px",

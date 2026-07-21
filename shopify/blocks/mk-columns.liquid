@@ -1,0 +1,507 @@
+{% liquid
+  assign block_settings = block.settings
+
+  assign has_column_1 = false
+  if block_settings.column_1_image != blank or block_settings.column_1_heading != blank or block_settings.column_1_text != blank
+    assign has_column_1 = true
+  endif
+
+  assign has_column_2 = false
+  if block_settings.column_2_image != blank or block_settings.column_2_heading != blank or block_settings.column_2_text != blank
+    assign has_column_2 = true
+  endif
+
+  assign has_column_3 = false
+  if block_settings.column_3_image != blank or block_settings.column_3_heading != blank or block_settings.column_3_text != blank
+    assign has_column_3 = true
+  endif
+
+  assign has_content = has_column_1
+  if has_column_2 or has_column_3
+    assign has_content = true
+  endif
+%}
+
+{% if has_content %}
+  <div
+    class="mk-columns-block"
+    style="
+      --mk-columns-image-size: {{ block_settings.image_size }}px;
+      --mk-columns-mobile-image-size: {{ block_settings.mobile_image_size }}px;
+      --mk-columns-image-radius: {{ block_settings.image_border_radius }}px;
+      --mk-columns-desktop-width: {{ block_settings.desktop_width_percent }}%;
+      --mk-columns-mobile-width: {{ block_settings.mobile_width_percent }}%;
+      --mk-columns-gap: {{ block_settings.column_gap }}px;
+      --mk-columns-mobile-gap: {{ block_settings.mobile_column_gap }}px;
+      --mk-columns-desktop-image-align: {{ block_settings.desktop_image_alignment }};
+      --mk-columns-mobile-image-align: {{ block_settings.mobile_image_alignment }};
+      --mk-columns-desktop-text-align: {{ block_settings.text_alignment }};
+      --mk-columns-mobile-text-align: {{ block_settings.mobile_text_alignment }};
+    "
+    {{ block.shopify_attributes }}
+  >
+    <div class="mk-columns-block__inner">
+      <div class="mk-columns-block__grid mk-columns-block__grid--{{ block_settings.content_placement }} mk-columns-block__grid--mobile-{{ block_settings.mobile_content_placement }}">
+        {% if has_column_1 %}
+          <article class="mk-columns-block__column">
+            {% if block_settings.column_1_image != blank %}
+              <div class="mk-columns-block__image-wrap">
+                {{
+                  block_settings.column_1_image
+                  | image_url: width: 1200
+                  | image_tag:
+                    loading: 'lazy',
+                    class: 'mk-columns-block__image',
+                    widths: '240, 360, 480, 720, 960, 1200',
+                    sizes: '(min-width: 990px) 33vw, 90vw'
+                }}
+              </div>
+            {% endif %}
+
+            <div class="mk-columns-block__content">
+              {% if block_settings.column_1_heading != blank %}
+                <h2 class="mk-columns-block__heading">{{ block_settings.column_1_heading }}</h2>
+              {% endif %}
+
+              {% if block_settings.column_1_text != blank %}
+                <div class="mk-columns-block__text rte">{{ block_settings.column_1_text }}</div>
+              {% endif %}
+            </div>
+          </article>
+        {% endif %}
+
+        {% if has_column_2 %}
+          <article class="mk-columns-block__column">
+            {% if block_settings.column_2_image != blank %}
+              <div class="mk-columns-block__image-wrap">
+                {{
+                  block_settings.column_2_image
+                  | image_url: width: 1200
+                  | image_tag:
+                    loading: 'lazy',
+                    class: 'mk-columns-block__image',
+                    widths: '240, 360, 480, 720, 960, 1200',
+                    sizes: '(min-width: 990px) 33vw, 90vw'
+                }}
+              </div>
+            {% endif %}
+
+            <div class="mk-columns-block__content">
+              {% if block_settings.column_2_heading != blank %}
+                <h2 class="mk-columns-block__heading">{{ block_settings.column_2_heading }}</h2>
+              {% endif %}
+
+              {% if block_settings.column_2_text != blank %}
+                <div class="mk-columns-block__text rte">{{ block_settings.column_2_text }}</div>
+              {% endif %}
+            </div>
+          </article>
+        {% endif %}
+
+        {% if has_column_3 %}
+          <article class="mk-columns-block__column">
+            {% if block_settings.column_3_image != blank %}
+              <div class="mk-columns-block__image-wrap">
+                {{
+                  block_settings.column_3_image
+                  | image_url: width: 1200
+                  | image_tag:
+                    loading: 'lazy',
+                    class: 'mk-columns-block__image',
+                    widths: '240, 360, 480, 720, 960, 1200',
+                    sizes: '(min-width: 990px) 33vw, 90vw'
+                }}
+              </div>
+            {% endif %}
+
+            <div class="mk-columns-block__content">
+              {% if block_settings.column_3_heading != blank %}
+                <h2 class="mk-columns-block__heading">{{ block_settings.column_3_heading }}</h2>
+              {% endif %}
+
+              {% if block_settings.column_3_text != blank %}
+                <div class="mk-columns-block__text rte">{{ block_settings.column_3_text }}</div>
+              {% endif %}
+            </div>
+          </article>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+{% stylesheet %}
+  .mk-columns-block {
+    padding-block: 48px;
+    width: 100%;
+  }
+
+  .mk-columns-block__inner {
+    width: min(100%, var(--mk-columns-desktop-width));
+    margin-inline: auto;
+  }
+
+  .mk-columns-block__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--mk-columns-gap);
+    align-items: start;
+  }
+
+  .mk-columns-block__column {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    text-align: var(--mk-columns-desktop-text-align);
+    align-items: stretch;
+    background-color: #f7f5f2;
+  }
+
+  .mk-columns-block__grid--image-left .mk-columns-block__column,
+  .mk-columns-block__grid--image-right .mk-columns-block__column {
+    display: grid;
+    grid-template-columns: minmax(0, var(--mk-columns-image-size)) minmax(0, 1fr);
+    align-items: center;
+    gap: 24px;
+  }
+
+  .mk-columns-block__grid--image-right .mk-columns-block__column > .mk-columns-block__image-wrap {
+    order: 2;
+  }
+
+  .mk-columns-block__image-wrap {
+    width: min(100%, var(--mk-columns-image-size));
+    justify-self: var(--mk-columns-desktop-image-align);
+    border-radius: var(--mk-columns-image-radius);
+    overflow: hidden;
+  }
+
+  .mk-columns-block__image {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .mk-columns-block__content {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 0 20px 20px;
+  }
+
+  .mk-columns-block__heading {
+    margin: 0;
+    font-family: Karma, var(--font-heading--family);
+    font-size: clamp(2rem, 3vw, 3rem);
+    font-weight: 400;
+    line-height: 1.05;
+  }
+
+  .mk-columns-block__text,
+  .mk-columns-block__text > * {
+    margin: 0;
+    font-family: var(--font-body--family);
+    font-size: 18px;
+    line-height: 1.7;
+  }
+
+  .mk-columns-block__text strong {
+    font-weight: 700;
+  }
+
+  @media screen and (max-width: 989px) {
+    .mk-columns-block__inner {
+      width: min(100%, var(--mk-columns-mobile-width));
+    }
+
+    .mk-columns-block__grid {
+      grid-template-columns: 1fr;
+      gap: var(--mk-columns-mobile-gap);
+    }
+
+    .mk-columns-block__column {
+      text-align: var(--mk-columns-mobile-text-align);
+    }
+
+    .mk-columns-block__grid--image-left .mk-columns-block__column,
+    .mk-columns-block__grid--image-right .mk-columns-block__column,
+    .mk-columns-block__grid--mobile-image-top .mk-columns-block__column,
+    .mk-columns-block__grid--mobile-image-bottom .mk-columns-block__column {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .mk-columns-block__grid--mobile-image-bottom .mk-columns-block__column > .mk-columns-block__image-wrap {
+      order: 2;
+    }
+
+    .mk-columns-block__image-wrap {
+      width: min(100%, var(--mk-columns-mobile-image-size));
+      justify-self: auto;
+      align-self: var(--mk-columns-mobile-image-align);
+    }
+
+    .mk-columns-block__heading {
+      font-size: clamp(1.8rem, 7vw, 2.6rem);
+    }
+
+    .mk-columns-block__text,
+    .mk-columns-block__text > * {
+      font-size: 17px;
+      line-height: 1.65;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "MK Columns",
+  "tag": null,
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "column_1_image",
+      "label": "Column 1 image"
+    },
+    {
+      "type": "text",
+      "id": "column_1_heading",
+      "label": "Column 1 heading",
+      "default": "Truth"
+    },
+    {
+      "type": "richtext",
+      "id": "column_1_text",
+      "label": "Column 1 text",
+      "default": "<p><strong>Great skincare does not need to make exaggerated promises.</strong> The right formulas can deliver meaningful results, but consistency is what brings those results to life. Skincare works best when it becomes part of a routine you can follow every day.</p>"
+    },
+    {
+      "type": "image_picker",
+      "id": "column_2_image",
+      "label": "Column 2 image"
+    },
+    {
+      "type": "text",
+      "id": "column_2_heading",
+      "label": "Column 2 heading",
+      "default": "Simplicity"
+    },
+    {
+      "type": "richtext",
+      "id": "column_2_text",
+      "label": "Column 2 text",
+      "default": "<p><strong>Effective skincare should fit into your life, not complicate it.</strong> We create thoughtful, easy-to-use formulas that give your skin what it needs without unnecessary steps, confusing routines or wasted time.</p>"
+    },
+    {
+      "type": "image_picker",
+      "id": "column_3_image",
+      "label": "Column 3 image"
+    },
+    {
+      "type": "text",
+      "id": "column_3_heading",
+      "label": "Column 3 heading",
+      "default": "Results"
+    },
+    {
+      "type": "richtext",
+      "id": "column_3_text",
+      "label": "Column 3 text",
+      "default": "<p><strong>Visible progress is always the goal.</strong> Whether that means brighter, smoother or more balanced-looking skin, every MAKKO formula is designed to support steady, noticeable improvement over time.</p>"
+    },
+    {
+      "type": "range",
+      "id": "image_size",
+      "label": "Image size",
+      "min": 80,
+      "max": 500,
+      "step": 10,
+      "unit": "px",
+      "default": 150
+    },
+    {
+      "type": "range",
+      "id": "mobile_image_size",
+      "label": "Mobile image size",
+      "min": 60,
+      "max": 300,
+      "step": 10,
+      "unit": "px",
+      "default": 120
+    },
+    {
+      "type": "range",
+      "id": "image_border_radius",
+      "label": "Image border radius",
+      "min": 0,
+      "max": 80,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "select",
+      "id": "content_placement",
+      "label": "Desktop content placement",
+      "default": "image-top",
+      "options": [
+        {
+          "value": "image-top",
+          "label": "Image top"
+        },
+        {
+          "value": "image-left",
+          "label": "Image left"
+        },
+        {
+          "value": "image-right",
+          "label": "Image right"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "desktop_image_alignment",
+      "label": "Desktop image alignment",
+      "default": "left",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Desktop text alignment",
+      "default": "left",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 40,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "label": "Desktop column gap",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 50
+    },
+    {
+      "type": "select",
+      "id": "mobile_content_placement",
+      "label": "Mobile content placement",
+      "default": "image-top",
+      "options": [
+        {
+          "value": "image-top",
+          "label": "Image top"
+        },
+        {
+          "value": "image-bottom",
+          "label": "Image bottom"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "mobile_image_alignment",
+      "label": "Mobile image alignment",
+      "default": "center",
+      "options": [
+        {
+          "value": "flex-start",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "flex-end",
+          "label": "Right"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "mobile_text_alignment",
+      "label": "Mobile text alignment",
+      "default": "center",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "mobile_width_percent",
+      "label": "Mobile width",
+      "min": 60,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 95
+    },
+    {
+      "type": "range",
+      "id": "mobile_column_gap",
+      "label": "Mobile column gap",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 20
+    }
+  ],
+  "presets": [
+    {
+      "name": "MK Columns",
+      "category": "Custom"
+    }
+  ]
+}
+{% endschema %}
