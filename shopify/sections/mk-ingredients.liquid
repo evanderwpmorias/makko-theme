@@ -184,11 +184,10 @@
   }
 
   .mk-ingredients__grid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: clamp(24px, 4vw, 48px);
-    align-items: center;
+    align-items: start;
   }
 
   .mk-ingredients__card {
@@ -196,8 +195,7 @@
     flex-direction: column;
     align-items: center;
     text-align: center;
-    flex: 0 1 calc((100% - (2 * clamp(24px, 4vw, 48px))) / 3);
-    max-width: 300px;
+    width: 100%;
     min-width: 0;
   }
 
@@ -277,10 +275,12 @@
   }
 
   @media screen and (max-width: 989px) {
+    .mk-ingredients__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
     .mk-ingredients__card {
-      flex-basis: calc((100% - clamp(24px, 4vw, 48px)) / 1.5);
       max-width: 100%;
-      margin: 0px auto;
     }
   }
 
