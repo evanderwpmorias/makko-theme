@@ -2,13 +2,19 @@
   assign section_settings = section.settings
   assign ingredients = product.metafields.custom.key_ingredients.value
   assign image_size = section_settings.image_size
+
+  assign ingredient_count = 0
+  if ingredients != blank
+    assign ingredient_count = ingredients.count
+  endif
 %}
 
-{% if ingredients != blank %}
+{% if ingredient_count > 0 %}
   <section
     class="mk-ingredients"
     style="
       --mk-ingredients-bg-color: {{ section_settings.background_color }};
+      --mk-ingredients-column-gap: {{ section_settings.column_gap }}px;
       --mk-ingredients-text-color: {{ section_settings.text_color }};
       --mk-ingredients-image-size: {{ image_size }}px;
       --mk-ingredients-image-radius: {{ section_settings.image_radius }}px;
@@ -33,12 +39,8 @@
         </div>
       {% endif %}
 
-      {% if ingredients != blank %}
-        {% liquid
-          assign ingredient_count = ingredients.count
-        %}
-
-        <div class="mk-ingredients__grid mobile:hidden">
+      {% if ingredient_count > 0 %}
+        <div class="mk-ingredients__grid mobile:hidden{% if section_settings.desktop_center_justify %} mk-ingredients__grid--desktop-center{% endif %}">
           {% for ingredient in ingredients %}
             {% liquid
               assign ingredient_title = ingredient.title.value | default: ingredient.title
@@ -186,8 +188,23 @@
   .mk-ingredients__grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: clamp(24px, 4vw, 48px);
+    gap: var(--mk-ingredients-column-gap);
     align-items: start;
+  }
+
+  @media screen and (min-width: 990px) {
+    .mk-ingredients__grid--desktop-center {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .mk-ingredients__grid--desktop-center > .mk-ingredients__card {
+      width: calc((100% - (2 * var(--mk-ingredients-column-gap))) / 3);
+      max-width: calc((100% - (2 * var(--mk-ingredients-column-gap))) / 3);
+      flex: 0 0 calc((100% - (2 * var(--mk-ingredients-column-gap))) / 3);
+    }
   }
 
   .mk-ingredients__card {
@@ -328,6 +345,22 @@
       "step": 10,
       "unit": "px",
       "default": 400
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "label": "Column gap",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "checkbox",
+      "id": "desktop_center_justify",
+      "label": "Center justify items on desktop",
+      "default": false
     },
     {
       "type": "range",
